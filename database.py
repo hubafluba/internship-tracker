@@ -26,7 +26,7 @@ def add_application(conn, company, role, date_applied, status, link=None, notes=
     conn.commit()
 
 def get_all(conn):
-    cursor = conn.execute("SELECT * FROM applications ORDER BY date_applied DESC")
+    cursor = conn.execute("SELECT * FROM applications ORDER BY date_applied DESC, id DESC")
     return cursor.fetchall()
 
 def update_status(conn, app_id, status):

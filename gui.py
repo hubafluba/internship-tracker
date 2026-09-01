@@ -7,7 +7,7 @@ COLUMNS = ("id", "company", "role", "date_applied", "status", "link")
 def build_window(conn):
     root = tk.Tk()
     root.title("Internship Tracker")
-    root.geometry("800x400")
+    root.geometry("1000x500")
     style = ttk.Style()
     try:
         style.theme_use("aqua")
@@ -25,10 +25,24 @@ def build_window(conn):
     tree.column("link", width=180)
 
     tree.pack(fill="both", expand=True, padx=10, pady=10)
-    tree.tag_configure("odd", background="#f5f5f5")
+    tree.tag_configure("odd", background="#f7f7f7")
 
     form = ttk.Frame(root)
     form.pack(fill="x", padx=10, pady=(0, 10))
+
+    def handle_add():
+        database.add_application(
+            conn,
+            entries["company"].get(),
+            entries["role"].get(),
+            entries["date_applied"].get(),
+            status.get(),
+            entries["link"].get(),
+            None,
+        )
+        refresh(tree, conn)
+        for e in entries.values():
+            e.delete(0, "end")
 
     entries = {}
     fields = ("company", "role", "date_applied", "link")
@@ -44,7 +58,7 @@ def build_window(conn):
     ttk.Label(form, text="Status").grid(row=0, column=len(fields), sticky="w")
     status.grid(row=1, column=len(fields), padx=(0, 8))
 
-    add_btn = ttk.Button(form, text="Add")
+    add_btn = ttk.Button(form, text="Add", command=handle_add)
     add_btn.grid(row=1, column=len(fields) + 1)
     return root, tree
 
