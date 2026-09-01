@@ -1,13 +1,14 @@
 import tkinter as tk
 from tkinter import ttk
 import database
+from tkinter import messagebox
 
 COLUMNS = ("id", "company", "role", "date_applied", "status", "link")
 
 def build_window(conn):
     root = tk.Tk()
     root.title("Internship Tracker")
-    root.geometry("1000x500")
+    root.geometry("1220x600")
     style = ttk.Style()
     try:
         style.theme_use("aqua")
@@ -44,6 +45,21 @@ def build_window(conn):
         for e in entries.values():
             e.delete(0, "end")
 
+    def handle_delete():
+        app_id = selected_id(tree)
+        if app_id is None:
+            return
+        if messagebox.askyesno("Delete", "Delete this application?"):
+            database.delete_application(conn, app_id)
+            refresh(tree, conn)
+
+    def handle_update():
+        app_id = selected_id(tree)
+        if app_id is None:
+            return
+        database.update_status(conn, app_id, status.get())
+        refresh(tree, conn)
+
     entries = {}
     fields = ("company", "role", "date_applied", "link")
     for i, field in enumerate(fields):
@@ -59,7 +75,11 @@ def build_window(conn):
     status.grid(row=1, column=len(fields), padx=(0, 8))
 
     add_btn = ttk.Button(form, text="Add", command=handle_add)
+    update_btn = ttk.Button(form, text="Update Status", command=handle_update)
+    delete_btn = ttk.Button(form, text="Delete", command=handle_delete)
     add_btn.grid(row=1, column=len(fields) + 1)
+    update_btn.grid(row=1, column=len(fields) + 2)
+    delete_btn.grid(row=1, column=len(fields) + 3)
     return root, tree
 
 def refresh(tree, conn):
@@ -69,6 +89,13 @@ def refresh(tree, conn):
     for i, app in enumerate(database.get_all(conn)):
         tag = "odd" if i % 2 else "even"
         tree.insert("", "end", values=[app[c] for c in COLUMNS], tags=(tag,))
+
+def selected_id(tree):
+    """Return the id of the selected row, or None if nothing is selected."""
+    selection = tree.selection()
+    if not selection:
+        return None
+    return tree.item(selection[0])["values"][0]
 
 if __name__ == "__main__":
     conn = database.init_db()
