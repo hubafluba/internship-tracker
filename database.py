@@ -1,18 +1,5 @@
 import sqlite3
 
-def add_application(conn, company, role, date_applied, status, link=None, notes=None):
-    conn.execute(
-        "INSERT INTO applications (company, role, date_applied, status, link, notes) "
-        "VALUES (?, ?, ?, ?, ?, ?)",
-        (company, role, date_applied, status, link, notes),
-    )
-    conn.commit()
-
-def get_all(conn):
-    cursor = conn.execute("SELECT * FROM applications ORDER BY date_applied DESC")
-    return cursor.fetchall()
-
-
 def init_db(path="applications.db"):
     conn = sqlite3.connect(path)
     conn.row_factory = sqlite3.Row
@@ -29,3 +16,23 @@ def init_db(path="applications.db"):
     """)
     conn.commit()
     return conn
+
+def add_application(conn, company, role, date_applied, status, link=None, notes=None):
+    conn.execute(
+        "INSERT INTO applications (company, role, date_applied, status, link, notes) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (company, role, date_applied, status, link, notes),
+    )
+    conn.commit()
+
+def get_all(conn):
+    cursor = conn.execute("SELECT * FROM applications ORDER BY date_applied DESC")
+    return cursor.fetchall()
+
+def update_status(conn, app_id, status):
+    conn.execute("UPDATE applications SET status = ? WHERE id = ?", (status, app_id))
+    conn.commit()
+
+def delete_application(conn, app_id):
+    conn.execute("DELETE FROM applications WHERE id = ?", (app_id,))
+    conn.commit()
